@@ -28,3 +28,17 @@ Event Notify is a plugin developed for SCP: Secret Laboratory game servers using
 
 ## Anti-Abuse System
 The plugin has an "Anti-abuse" system so that administrators do not use the admin panel at the event and do not interfere with the Event Master to hold the event
+
+# Installation
+1. Download the Plugin
+   - Get the latest version from the [Releases](https://github.com/RozyServer/Event-Notify/releases) page.
+
+2. Install the Plugin
+   - Place the downloaded ``Event-Notify.dll`` file into your server's plugins directory: ``\EXILED\Plugins\``.
+
+3. Configure the Plugin
+   - Run your server once to generate the default configuration files.
+   - Navigate to the ``\EXILED\Configs\`` folder to customize settings
+
+4. Restart the Server
+   - Restart your SCP: Secret Laboratory server to apply the new configurations.
