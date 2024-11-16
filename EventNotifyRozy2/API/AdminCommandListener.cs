@@ -18,22 +18,47 @@ namespace EventNotifyRozy2.API
             [HarmonyPrefix]
             public static bool Prefix(ref string q, CommandSender sender)
             {
-                string adminNickname = sender is CommandSender commandSender ? commandSender.Nickname : "Unknow administrator";
-                Player ply = (Player)Player.List.Where(player => player.Nickname == EventPugin.EventMaster);
-                Player player = Player.List.FirstOrDefault(p => p.Nickname.Equals(adminNickname, StringComparison.OrdinalIgnoreCase));
-
-                if (player != null && !EventPugin.EventHelpers.Any(helper => helper.Equals(player.Id)) && player.Nickname != EventPugin.EventMaster)
+                try
                 {
-
-                    string webhookMessage = $"{adminNickname} used a command {q} on the Event";
-                    WebhookNotifier.SendAdminCommandNotification(webhookMessage);
-                    if (ply != null)
+                    if (!q.StartsWith("$") && !q.StartsWith("@"))
                     {
-                        ply.Broadcast(10, webhookMessage, Broadcast.BroadcastFlags.AdminChat);
+
+                        string adminNickname = sender is CommandSender commandSender
+                            ? commandSender.Nickname
+                            : "Unknown administrator";
+                        Player ply = (Player)Player.List.FirstOrDefault(player =>
+                            player.Nickname == EventPlugin.EventMaster);
+                        Player player = Player.List.FirstOrDefault(p =>
+                            p.Nickname.Equals(adminNickname, StringComparison.OrdinalIgnoreCase));
+                        if (EventPlugin.EventMode)
+                        {
+                            if (player != null && !EventPlugin.EventHelpers.Any(helper => helper.Equals(player.Id)) &&
+                                player.Nickname != EventPlugin.EventMaster)
+                            {
+                                var time = DateTime.Now;
+                                string webhookMessage = $"[{time}]\n{adminNickname} used a command {q} on the Event {EventPlugin.EventName}";
+                                Send(webhookMessage);
+                                if (ply != null)
+                                {
+                                    ply.Broadcast(5, webhookMessage);
+                                }
+                            }
+                            return true;
+                        }
+                        return true;
                     }
+                    return true;
                 }
+                catch (Exception ex)
+                {
+                    Log.Error($"Error in AdminCommandPatch: {ex}");
                     return true;
                 }
             }
+            private static async void Send(string webhookMessage)
+            {
+                await WebhookNotifier.SendAdminCommandNotification(webhookMessage);
+            }
         }
     }
+}
