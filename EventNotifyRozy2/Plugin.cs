@@ -18,6 +18,9 @@ using InventorySystem.Items.MicroHID;
 using SCPSLAudioApi;
 using System.Collections;
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
 using Interactables.Interobjects.DoorUtils;
 using Exiled.API.Enums;
 using Subtitles;
@@ -28,14 +31,14 @@ using HarmonyLib;
 
 namespace EventNotifyRozy2
 {
-    public class EventPugin : Plugin<Config>
+    public class EventPlugin : Plugin<Config>
     {
         public override string Prefix => "EventNotifyRozy2";
         public override string Name => "EventNotifyRozy2";
         public override string Author => "SuperLoli Collective";
-        public override System.Version Version { get; } = new System.Version(1, 4, 88);
+        public override System.Version Version { get; } = new System.Version(1, 0, 4);
 
-        public static EventPugin plugin;
+        public static EventPlugin plugin;
         public static CoroutineHandle hintCoroutine;
         public static bool EventMode = false;
         public static bool EventPreparation = false;
@@ -49,7 +52,7 @@ namespace EventNotifyRozy2
         public Dictionary<string, Dictionary<string, float>> GunDamage { get; } = new Dictionary<string, Dictionary<string, float>>();
         public static List<int> EventHelpers { get; } = new List<int>();
         private static bool TeslaDisabled { get; set; } = false;
-        public static EventPugin Instance { get; private set; }
+        public static EventPlugin Instance { get; private set; }
 
         public static string EventMasterGroup = "Unknown";
         public static GrenadeLauncher GrenadeLauncher { get; private set; }
@@ -69,6 +72,8 @@ namespace EventNotifyRozy2
         {
             return _teslaDisabled;
         }
+        private TcpListener _tcpListener;
+        private CancellationTokenSource _cancellationTokenSource;
 
         public static void SetTeslaDisabled(bool value)
         {
@@ -102,6 +107,8 @@ namespace EventNotifyRozy2
             Exiled.Events.Handlers.Player.DamagingDoor += OnDamagingDoor;
             Exiled.Events.Handlers.Player.Escaping += OnEscaping;
             Exiled.Events.Handlers.Player.UsingMicroHIDEnergy += OnUsingMicroHIDEnergy;
+            //_networkListener = new NetworkListener(Config.Ip, Config.Port, this);
+            //_networkListener.Start();
             harmony.PatchAll();
             GrenadeLauncher = new GrenadeLauncher();
             CustomWeapon.RegisterItems();
@@ -109,6 +116,7 @@ namespace EventNotifyRozy2
             WindowsActive = false;
             DoorsActive = false;
             base.OnEnabled();
+            //StartTcpServer();
             Instance = this;
         }
 public void OnUsingMicroHIDEnergy(UsingMicroHIDEnergyEventArgs ev)
@@ -143,13 +151,17 @@ public void OnUsingMicroHIDEnergy(UsingMicroHIDEnergyEventArgs ev)
         {
             ev.IsAllowed = false;
         }
+
         private void OnLocalReporting(LocalReportingEventArgs ev)
         {
-            string message = $"<b><color=green>{ev.Player.Sender.Nickname} </color>reports about <color=red>{ev.Target.Nickname}</color> for reason: <color=blue>{ev.Reason}</color></color></b>";
-
-            foreach (Player admin in Player.List.Where(p => p.Group?.KickPower >= 1))
+            string message =
+                $"<b><color=green>{ev.Player.Sender.Nickname} </color>reports about <color=red>{ev.Target.Nickname}</color> for reason: <color=blue>{ev.Reason}</color></color></b>";
+            if (this.Config.ReportBroadcast)
             {
-                Timing.RunCoroutine(SendBroadcast(admin, message));
+                foreach (Player admin in Player.List.Where(p => p.Group?.KickPower >= 1))
+                {
+                    Timing.RunCoroutine(SendBroadcast(admin, message));
+                }
             }
         }
 
@@ -212,11 +224,20 @@ public void OnUsingMicroHIDEnergy(UsingMicroHIDEnergyEventArgs ev)
             }
         }
 
-        private static void OnWaitingPlayers()
+        private void OnWaitingPlayers()
         {
+            if (this.Config.Hint)
+            {
+                foreach (Player ply in Player.List)
+                {
+                    ply.ShowHint(
+                        this.Config.HintWT.Replace("%PLAYER%", ply.Nickname).Replace("%STEAMID%", ply.UserId)
+                            .Replace("%ID%", ply.Id.ToString()),
+                        4);
+                }
+            }
         }
-
-        public override void OnDisabled()
+           public override void OnDisabled()
         {
             plugin = null;
             Exiled.Events.Handlers.Server.RoundEnded -= OnEnded;
@@ -231,12 +252,11 @@ public void OnUsingMicroHIDEnergy(UsingMicroHIDEnergyEventArgs ev)
             CustomWeapon.UnregisterItems();
             CustomItem.UnregisterItems();
             GrenadeLauncher = null;
+            //StopTcpServer();
             Instance = null;
             WindowsActive = false;
             DoorsActive = false;
-            {
-                base.OnDisabled();
-            }
+            base.OnDisabled();
         }
     }
 }
