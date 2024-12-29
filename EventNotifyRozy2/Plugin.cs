@@ -1,32 +1,13 @@
-﻿using Discord.WebSocket;
-using Discord;
-using Exiled.API.Features;
+﻿using Exiled.API.Features;
 using Exiled.Events.EventArgs.Server;
 using MEC;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using PluginAPI.Events;
 using Exiled.Events.EventArgs.Player;
-using Exiled.API.Features.Items;
-using InventorySystem.Items.MicroHID;
-using SCPSLAudioApi;
-using System.Collections;
-using System.IO;
-using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using Interactables.Interobjects.DoorUtils;
-using Exiled.API.Enums;
-using Subtitles;
 using RozyLib;
 using Exiled.CustomItems.API.Features;
-using Exiled.CustomItems.API;
 using HarmonyLib;
 
 namespace EventNotifyRozy2
@@ -99,16 +80,12 @@ namespace EventNotifyRozy2
             Log.Send(rozy, Discord.LogLevel.Info, ConsoleColor.Yellow);
             plugin = this;
             Exiled.Events.Handlers.Server.RoundEnded += OnEnded;
-            Exiled.Events.Handlers.Server.WaitingForPlayers += OnWaitingPlayers;
             Exiled.Events.Handlers.Player.TriggeringTesla += OnTriggeringTesla;
-            Exiled.Events.Handlers.Server.LocalReporting += OnLocalReporting;
             Exiled.Events.Handlers.Player.UsingRadioBattery += OnUsingRadioBattery;
-            Exiled.Events.Handlers.Player.PlayerDamageWindow += OnPlayerDamageWindow;
+            Exiled.Events.Handlers.Player.DamagingWindow += OnPlayerDamageWindow;
             Exiled.Events.Handlers.Player.DamagingDoor += OnDamagingDoor;
             Exiled.Events.Handlers.Player.Escaping += OnEscaping;
             Exiled.Events.Handlers.Player.UsingMicroHIDEnergy += OnUsingMicroHIDEnergy;
-            //_networkListener = new NetworkListener(Config.Ip, Config.Port, this);
-            //_networkListener.Start();
             harmony.PatchAll();
             GrenadeLauncher = new GrenadeLauncher();
             CustomWeapon.RegisterItems();
@@ -116,10 +93,9 @@ namespace EventNotifyRozy2
             WindowsActive = false;
             DoorsActive = false;
             base.OnEnabled();
-            //StartTcpServer();
             Instance = this;
         }
-public void OnUsingMicroHIDEnergy(UsingMicroHIDEnergyEventArgs ev)
+        public void OnUsingMicroHIDEnergy(UsingMicroHIDEnergyEventArgs ev)
         {
             if (HidActive)
             {
@@ -133,7 +109,7 @@ public void OnUsingMicroHIDEnergy(UsingMicroHIDEnergyEventArgs ev)
                 ev.IsAllowed = false;
             }
         }
-            public void OnPlayerDamageWindow(DamagingWindowEventArgs ev)
+        public void OnPlayerDamageWindow(DamagingWindowEventArgs ev)
         {
             if (WindowsActive)
             {
@@ -151,27 +127,6 @@ public void OnUsingMicroHIDEnergy(UsingMicroHIDEnergyEventArgs ev)
         {
             ev.IsAllowed = false;
         }
-
-        private void OnLocalReporting(LocalReportingEventArgs ev)
-        {
-            string message =
-                $"<b><color=green>{ev.Player.Sender.Nickname} </color>reports about <color=red>{ev.Target.Nickname}</color> for reason: <color=blue>{ev.Reason}</color></color></b>";
-            if (this.Config.ReportBroadcast)
-            {
-                foreach (Player admin in Player.List.Where(p => p.Group?.KickPower >= 1))
-                {
-                    Timing.RunCoroutine(SendBroadcast(admin, message));
-                }
-            }
-        }
-
-        private IEnumerator<float> SendBroadcast(Player admin, string message)
-        {
-            admin.Broadcast(10, message);
-            yield return 0f;
-        }
-
-
         public static void OnEnded(RoundEndedEventArgs ev)
         {
             if (plugin.Config.RoundDependence && (EventMode || EventPreparation))
@@ -223,35 +178,19 @@ public void OnUsingMicroHIDEnergy(UsingMicroHIDEnergyEventArgs ev)
                 }
             }
         }
-
-        private void OnWaitingPlayers()
-        {
-            if (this.Config.Hint)
-            {
-                foreach (Player ply in Player.List)
-                {
-                    ply.ShowHint(
-                        this.Config.HintWT.Replace("%PLAYER%", ply.Nickname).Replace("%STEAMID%", ply.UserId)
-                            .Replace("%ID%", ply.Id.ToString()),
-                        4);
-                }
-            }
-        }
            public override void OnDisabled()
         {
             plugin = null;
             Exiled.Events.Handlers.Server.RoundEnded -= OnEnded;
-            Exiled.Events.Handlers.Server.WaitingForPlayers -= OnWaitingPlayers;
             Exiled.Events.Handlers.Player.TriggeringTesla -= OnTriggeringTesla;
             Exiled.Events.Handlers.Player.UsingRadioBattery -= OnUsingRadioBattery;
-            Exiled.Events.Handlers.Player.PlayerDamageWindow -= OnPlayerDamageWindow;
+            Exiled.Events.Handlers.Player.DamagingWindow -= OnPlayerDamageWindow;
             Exiled.Events.Handlers.Player.DamagingDoor -= OnDamagingDoor;
             harmony.UnpatchAll();
             ProtectedChannels.Clear();
             CustomWeapon.UnregisterItems();
             CustomItem.UnregisterItems();
             GrenadeLauncher = null;
-            //StopTcpServer();
             Instance = null;
             WindowsActive = false;
             DoorsActive = false;
