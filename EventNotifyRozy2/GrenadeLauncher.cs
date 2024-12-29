@@ -1,5 +1,6 @@
 ﻿using Exiled.API.Features;
 using Exiled.API.Features.Attributes;
+using Exiled.API.Features.DamageHandlers;
 using Exiled.API.Features.Items;
 using Exiled.API.Features.Spawn;
 using Exiled.CustomItems.API.Features;
@@ -28,9 +29,13 @@ namespace RozyLib
             if (Check(ev.Player.CurrentItem))
             {
                 if (!Check(ev.Firearm)) return;
-                ev.Firearm.Ammo = ClipSize;
                 _ = ShootGrenades(ev.Player);
             }
+        }
+        protected override void OnHurting(HurtingEventArgs ev)
+        {
+            if (!Check(ev.Attacker.CurrentItem)) return;
+            ev.DamageHandler.Damage = 0f;
         }
         private async Task ShootGrenades(Player player)
         {
@@ -38,7 +43,7 @@ namespace RozyLib
             if (grenade != null)
             {
                 grenade.FuseTime = 1f;
-                player.ThrowGrenade(Exiled.API.Enums.ProjectileType.FragGrenade);
+                await Task.Delay(25); player.ThrowGrenade(Exiled.API.Enums.ProjectileType.FragGrenade);
                 player.RemoveItem(grenade);
             }
         }

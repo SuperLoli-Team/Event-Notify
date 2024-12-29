@@ -12,7 +12,7 @@ namespace EventNotifyRozy2.API
 
         public static async Task SendAdminCommandNotification(string webhookMessage)
         {
-            string webhookUrl = EventPugin.plugin.Config.WebhookUrlAbus;
+            string webhookUrl = EventPlugin.plugin.Config.WebhookUrlAbus;
 
             var embed = new
             {
@@ -24,7 +24,7 @@ namespace EventNotifyRozy2.API
                         description = webhookMessage,
                         color = 5814783
                     }
-                }
+                },
             };
 
             var jsonPayload = Newtonsoft.Json.JsonConvert.SerializeObject(embed);

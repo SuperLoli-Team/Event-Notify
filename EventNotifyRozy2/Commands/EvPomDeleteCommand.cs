@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RozyLib.Commands
+namespace EventNotifyRozy2.Commands
 {
     using CommandSystem;
     using EventNotifyRozy2;
@@ -44,13 +44,13 @@ namespace RozyLib.Commands
                 return false;
             }
 
-            if (!EventPugin.EventHelpers.Contains(target.Id))
+            if (!EventPlugin.EventHelpers.Contains(target.Id))
             {
                 response = $"Player {target.Nickname} is not a helper.";
                 return false;
             }
 
-            EventPugin.EventHelpers.Remove(target.Id);
+            EventPlugin.EventHelpers.Remove(target.Id);
             response = string.Format("Player has been removed from the helpers list.", target.Nickname);
             target.Broadcast(5, "<color=yellow>You were removed from the Helper</color>");
             return true;

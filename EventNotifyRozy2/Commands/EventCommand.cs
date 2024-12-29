@@ -9,13 +9,13 @@ using Exiled.Permissions.Extensions;
 using Exiled.API.Features;
 using System.Linq;
 
-namespace EventNotifyRozy2
+namespace EventNotifyRozy2.Commands
 {
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
     public class EventCommand : ICommand, IUsageProvider
     {
         public bool SanitizeResponse => false;
-        private readonly EventPugin plugin;
+        private readonly EventPlugin plugin;
         public string Command => "Eventotp";
         public string[] Aliases { get; } = { "Evotp" };
         public string Description => "Start Event";
@@ -28,7 +28,7 @@ namespace EventNotifyRozy2
         {
             if (!((CommandSender)sender).CheckPermission("rozy.command"))
             {
-                if (!EventPugin.plugin.Config.EventCodeActive)
+                if (!EventPlugin.plugin.Config.EventCodeActive)
                 {
                     response = "This command are off in Config";
                     return false;
@@ -37,53 +37,52 @@ namespace EventNotifyRozy2
                 return false;
             }
 
-            EventPugin.EventMaster = ((CommandSender)sender).Nickname;
-            EventPugin.EventMasterGroup = EventPugin.GetUserGroup((CommandSender)sender);
+            EventPlugin.EventMaster = ((CommandSender)sender).Nickname;
+            EventPlugin.EventMasterGroup = EventPlugin.GetUserGroup((CommandSender)sender);
 
             if (arguments.Array.Length > 1)
             {
-                EventPugin.EventRP = arguments.Array[1];
+                EventPlugin.EventRP = arguments.Array[1];
             }
 
             if (arguments.Array.Length > 2)
             {
-                EventPugin.EventName = "";
+                EventPlugin.EventName = "";
                 for (int i = 2; i < arguments.Array.Length; i++)
                 {
-                    EventPugin.EventName = EventPugin.EventName + arguments.Array[i] + " ";
+                    EventPlugin.EventName = EventPlugin.EventName + arguments.Array[i] + " ";
                 }
             }
 
             int playerCount = Player.List.Count();
-            TimeSpan preparationTime = EventPugin.time;
+            TimeSpan preparationTime = EventPlugin.time;
 
-            if (EventPugin.EventMode)
+            if (EventPlugin.EventMode)
             {
-                EventPugin.EventMode = false;
-                Timing.KillCoroutines(EventPugin.hintCoroutine);
+                EventPlugin.EventMode = false;
+                Timing.KillCoroutines(EventPlugin.hintCoroutine);
                 response = "Event ended.";
-                EventPugin.EventRP = "Unknown";
-                EventPugin.EventName = "Unknown";
-                EventPugin.EventMaster = "Unknown";
-                EventPugin.EventMasterGroup = "Unknown";
-                EventPugin.time = new TimeSpan(0, 0, 0);
+                EventPlugin.EventRP = "Unknown";
+                EventPlugin.EventName = "Unknown";
+                EventPlugin.EventMaster = "Unknown";
+                EventPlugin.EventMasterGroup = "Unknown";
+                EventPlugin.time = new TimeSpan(0, 0, 0);
             }
             else
             {
-                EventPugin.EventMode = true;
-                EventPugin.EventPreparation = false;
-                Timing.KillCoroutines(EventPugin.hintCoroutine);
-                EventPugin.time = new TimeSpan(0, 0, 0);
-                EventPugin.hintCoroutine = Timing.RunCoroutine(EventPugin.HintCoroutine());
+                EventPlugin.EventMode = true;
+                EventPlugin.EventPreparation = false;
+                Timing.KillCoroutines(EventPlugin.hintCoroutine);
+                EventPlugin.time = new TimeSpan(0, 0, 0);
+                EventPlugin.hintCoroutine = Timing.RunCoroutine(EventPlugin.HintCoroutine());
                 response = "Event start!";
-                //char min = (char)preparationTime.Minutes;
                 
-                string webhookUrl = EventPugin.plugin.Config.WebhookUrl;
-                string eventName = EventPugin.EventName.Trim();
-                string eventRP = EventPugin.EventRP;
-                string eventMaster = EventPugin.EventMaster;
-                string eventMasterGroup = EventPugin.EventMasterGroup;
-                //string Mess = EventPugin.Instance.Config.AnouncmentEvent.Replace("%NAME%", eventName).Replace("%RP%", eventRP).Replace("%MASTER%", eventMaster);
+                string webhookUrl = EventPlugin.plugin.Config.WebhookUrl;
+                string eventName = EventPlugin.EventName.Trim();
+                string eventRP = EventPlugin.EventRP;
+                string eventMaster = EventPlugin.EventMaster;
+                string eventMasterGroup = EventPlugin.EventMasterGroup;
+                //string Mess = EventPlugin.Instance.Config.AnouncmentEvent.Replace("%NAME%", eventName).Replace("%RP%", eventRP).Replace("%MASTER%", eventMaster);
                 //$"\n*On server started an event* **{eventName}** \n*with a RP level* **{eventRP}**.\n*Event Master:* **{eventMaster}** (Group of Event Master: **{eventMasterGroup}**)\n *preparation lasted* **{preparationTime.Minutes} min {preparationTime.Seconds} sec**.\n*Count of player on start event:* **{playerCount}**.";
                 string embedMessage = $"\n*On server started an event* **{eventName}** \n*with a RP level* **{eventRP}**.\n*Event Master:* **{eventMaster}** (Group of Event Master: **{eventMasterGroup}**)\n *preparation lasted* **{preparationTime.Minutes} min {preparationTime.Seconds} sec**.\n*Count of player on start event:* **{playerCount}**."; ;
                 SendWebhookMessage(webhookUrl, embedMessage, eventName, eventRP, eventMaster, playerCount).ConfigureAwait(false);

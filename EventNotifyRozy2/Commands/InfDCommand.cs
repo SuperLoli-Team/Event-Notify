@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EventNotifyRozy2
+namespace EventNotifyRozy2.Commands
 {
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
     public class InfDCommand : ICommand
@@ -19,12 +19,12 @@ namespace EventNotifyRozy2
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            if (!EventPugin.plugin.Config.InfDCodeActive)
+            if (!EventPlugin.plugin.Config.InfDCodeActive)
             {
                 response = "This command are disabled on Config";
                 return false;
             }
-            var plugin = EventPugin.Instance;
+            var plugin = EventPlugin.Instance;
 
             plugin.DoorsActive = !plugin.DoorsActive;
 

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EventNotifyRozy2
+namespace EventNotifyRozy2.Commands
 {
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
     public class EscapeCommand : ICommand
@@ -16,12 +16,12 @@ namespace EventNotifyRozy2
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            if (!EventPugin.plugin.Config.EscapeCodeActive)
+            if (!EventPlugin.plugin.Config.EscapeCodeActive)
             {
                 response = "This command are off in Config";
                 return false;
             }
-            var plugin = EventPugin.Instance;
+            var plugin = EventPlugin.Instance;
 
             plugin.EscapeActive = !plugin.EscapeActive;
 

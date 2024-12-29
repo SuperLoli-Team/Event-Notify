@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EventNotifyRozy2
+namespace EventNotifyRozy2.Commands
 {
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
     public class EventStopCommand : ICommand
@@ -21,7 +21,7 @@ namespace EventNotifyRozy2
         {
             if (!((CommandSender)sender).CheckPermission("rozy.command"))
             {
-                if (!EventPugin.plugin.Config.EventCodeActive)
+                if (!EventPlugin.plugin.Config.EventCodeActive)
                 {
                     response = "The command is unavailable as it is disabled in the configuration.";
                     return false;
@@ -30,12 +30,12 @@ namespace EventNotifyRozy2
                 return false;
             }
 
-            if (EventPugin.EventMode || EventPugin.EventPreparation)
+            if (EventPlugin.EventMode || EventPlugin.EventPreparation)
             {
-                EventPugin.EventMode = false;
-                EventPugin.EventPreparation = false;
-                Timing.KillCoroutines(EventPugin.hintCoroutine);
-                EventPugin.time = new TimeSpan(0, 0, 0);
+                EventPlugin.EventMode = false;
+                EventPlugin.EventPreparation = false;
+                Timing.KillCoroutines(EventPlugin.hintCoroutine);
+                EventPlugin.time = new TimeSpan(0, 0, 0);
                 response = "The event has been concluded.";
             }
             else

@@ -14,14 +14,14 @@ using System.Net.Http;
 using Exiled.Events.Commands.PluginManager;
 using System.Collections;
 
-namespace EventNotifyRozy2
+namespace EventNotifyRozy2.Commands
 {
 
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
     public class EventPodCommand : ICommand, IUsageProvider
     {
         public bool SanitizeResponse => false;
-        private readonly EventPugin plugin;
+        private readonly EventPlugin plugin;
         public string Command => "Eventpod";
         public string[] Aliases { get; } = { "Evpod" };
         public string Description => "Start event preparation";
@@ -30,7 +30,7 @@ namespace EventNotifyRozy2
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            if (!EventPugin.plugin.Config.EventCodeActive)
+            if (!EventPlugin.plugin.Config.EventCodeActive)
             {
                 response = "The command is unavailable as it is disabled in the configuration.";
                 return false;
@@ -41,34 +41,34 @@ namespace EventNotifyRozy2
                 return false;
             }
 
-            EventPugin.EventMaster = ((CommandSender)sender).Nickname;
-            EventPugin.EventMasterGroup = EventPugin.GetUserGroup((CommandSender)sender);
+            EventPlugin.EventMaster = ((CommandSender)sender).Nickname;
+            EventPlugin.EventMasterGroup = EventPlugin.GetUserGroup((CommandSender)sender);
 
             if (arguments.Array.Length > 1)
             {
-                EventPugin.EventRP = arguments.Array[1];
+                EventPlugin.EventRP = arguments.Array[1];
             }
 
             if (arguments.Array.Length > 2)
             {
-                EventPugin.EventName = "";
+                EventPlugin.EventName = "";
                 for (int i = 2; i < arguments.Array.Length; i++)
                 {
-                    EventPugin.EventName = EventPugin.EventName + arguments.Array[i] + " ";
+                    EventPlugin.EventName = EventPlugin.EventName + arguments.Array[i] + " ";
                 }
             }
 
-            if (!EventPugin.EventPreparation)
+            if (!EventPlugin.EventPreparation)
             {
-                EventPugin.time = new TimeSpan(0, 0, 0);
-                EventPugin.EventPreparation = true;
-                EventPugin.hintCoroutine = Timing.RunCoroutine(EventPugin.HintCoroutine());
+                EventPlugin.time = new TimeSpan(0, 0, 0);
+                EventPlugin.EventPreparation = true;
+                EventPlugin.hintCoroutine = Timing.RunCoroutine(EventPlugin.HintCoroutine());
                 response = "Preparation has started.";
-                string webhookUrl = EventPugin.plugin.Config.WebhookUrl;
-                string eventName = EventPugin.EventName.Trim();
-                string eventRP = EventPugin.EventRP;
-                string eventMaster = EventPugin.EventMaster;
-                string eventMasterGroup = EventPugin.EventMasterGroup;
+                string webhookUrl = EventPlugin.plugin.Config.WebhookUrl;
+                string eventName = EventPlugin.EventName.Trim();
+                string eventRP = EventPlugin.EventRP;
+                string eventMaster = EventPlugin.EventMaster;
+                string eventMasterGroup = EventPlugin.EventMasterGroup;
                 int playerCount = Player.List.Count();
                 string message = $"\n\n*Preparation for the event has started on the server* **{eventName}** \n*with RP level* **{eventRP}**.\n*Host:* **{eventMaster}** (Role: {eventMasterGroup})\n*Number of players at the start of preparation:* **{playerCount}**.";
                 SendWebhookMessage(webhookUrl, message).ConfigureAwait(false);

@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EventNotifyRozy2
+namespace EventNotifyRozy2.Commands
 {
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
     public class DClassDoorCommand : ICommand, IUsageProvider
@@ -22,7 +22,7 @@ namespace EventNotifyRozy2
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
-            if (!EventPugin.plugin.Config.DCDCodeActive)
+            if (!EventPlugin.plugin.Config.DCDCodeActive)
             {
                 response = "This Command are off in Config";
                 return false;
