@@ -243,7 +243,6 @@ public void OnUsingMicroHIDEnergy(UsingMicroHIDEnergyEventArgs ev)
             Exiled.Events.Handlers.Server.RoundEnded -= OnEnded;
             Exiled.Events.Handlers.Server.WaitingForPlayers -= OnWaitingPlayers;
             Exiled.Events.Handlers.Player.TriggeringTesla -= OnTriggeringTesla;
-            Exiled.Events.Handlers.Server.LocalReporting -= OnLocalReporting;
             Exiled.Events.Handlers.Player.UsingRadioBattery -= OnUsingRadioBattery;
             Exiled.Events.Handlers.Player.PlayerDamageWindow -= OnPlayerDamageWindow;
             Exiled.Events.Handlers.Player.DamagingDoor -= OnDamagingDoor;
